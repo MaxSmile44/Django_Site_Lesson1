@@ -1,20 +1,19 @@
 from datacenter.models import Passcard
 from datacenter.models import Visit
 from django.shortcuts import render
-from pytz import timezone
 
+
+MINUTES=60
 
 def storage_information_view(request):
-    our_timezone = timezone('Europe/Moscow')
     non_closed_visits = []
-    non_closed_dict = dict()
-    for visit in Visit.objects.values().filter(leaved_at=None):
-        non_closed_dict['who_entered'] = Passcard.objects.filter(id = visit['passcard_id'])[0].owner_name
-        non_closed_dict['entered_at'] = visit['entered_at'].astimezone(our_timezone).strftime("%d %b %Y г. %H:%M")
-        non_closed_dict['duration'] = Visit.format_duration(Visit.get_duration(visit, already_left=False))
-        non_closed_dict['is_strange'] = Visit.is_visit_long(Visit.get_duration(visit, already_left=False), minutes=60)
-        copy_non_closed_dict = non_closed_dict.copy()
-        non_closed_visits.append(copy_non_closed_dict)
+    one_visit = dict()
+    for visit in Visit.objects.filter(leaved_at=None):
+        one_visit['who_entered'] = visit.passcard
+        one_visit['entered_at'] = visit.entered_at.astimezone().strftime("%d %b %Y г. %H:%M")
+        one_visit['duration'] = str(Visit.get_duration(visit)).split('.')[0]
+        one_visit['is_strange'] = Visit.is_visit_long(Visit.get_duration(visit), MINUTES)
+        non_closed_visits.append(one_visit.copy())
     context = {
         'non_closed_visits': non_closed_visits,  # не закрытые посещения
     }

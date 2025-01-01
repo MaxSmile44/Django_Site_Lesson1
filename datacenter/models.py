@@ -1,5 +1,5 @@
 from django.db import models
-from pytz import timezone
+from django.utils import timezone
 import datetime
 
 
@@ -31,19 +31,12 @@ class Visit(models.Model):
             )
         )
 
-    def get_duration(visit, already_left=True):
-        if already_left:
-            duration = visit['leaved_at'] - visit['entered_at']
+    def get_duration(visit):
+        if visit not in Visit.objects.filter(leaved_at=None):
+            duration = visit.leaved_at - visit.entered_at
         else:
-            our_timezone = timezone('Europe/Moscow')
-            now = datetime.datetime.now().astimezone(our_timezone)
-            duration = now - visit['entered_at']
-        return duration.seconds
-
-    def format_duration(duration):
-        hours, other = divmod(duration, 3600)
-        minutes, seconds = divmod(other, 60)
-        return f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}'
+            duration = timezone.localtime() - visit.entered_at.astimezone()
+        return duration
 
     def is_visit_long(duration, minutes=60):
-        return True if duration > minutes * 60 else False
+        return duration.seconds > minutes * 60
