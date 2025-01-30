@@ -25,7 +25,7 @@ INSTALLED_APPS = ['datacenter']
 
 ROOT_URLCONF = 'project.urls'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['X-Forwarded-Host']
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
